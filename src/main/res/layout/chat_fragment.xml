@@ -43,7 +43,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text=""
-                android:textAppearance="?android:textAppearanceMedium"
+                android:textAppearance="?android:textAppearanceSmall"
                 android:textColor="@color/white"
                 android:textStyle="normal"
                 app:layout_constraintBottom_toTopOf="@+id/recyclerView2"
@@ -59,7 +59,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
                 android:text=""
-                android:textAppearance="?android:textAppearanceMedium"
+                android:textAppearance="?android:textAppearanceSmall"
                 android:textColor="@color/white"
                 android:textStyle="normal"
                 app:layout_constraintBottom_toTopOf="@+id/recyclerView2"
@@ -75,8 +75,9 @@
 
         <TextView
             android:id="@+id/action_leave"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight=".5"
             android:layout_marginRight="10dp"
             android:gravity="right|center"
             android:layout_gravity="right|center"

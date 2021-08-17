@@ -25,31 +25,32 @@ class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        Channel channel = getIntent().getParcelableExtra(Constants.EXTRA_CHANNEL);
-        bundle = getIntent().getExtras();
-        String position = bundle.getString(Constants.EXTRA_ID, null);
-        String name = bundle.getString(Constants.EXTRA_NAME,null);
-        String type = bundle.getString(Constants.EXTRA_TYPE,null);
-        channel =bundle.getParcelable(Constants.EXTRA_CHANNEL);
+            Channel channel = getIntent().getParcelableExtra(Constants.EXTRA_CHANNEL);
+            bundle = getIntent().getExtras();
+            String position = bundle.getString(Constants.EXTRA_ID, null);
+            String name = bundle.getString(Constants.EXTRA_NAME,null);
+            String type = bundle.getString(Constants.EXTRA_TYPE,null);
+            channel =bundle.getParcelable(Constants.EXTRA_CHANNEL);
 
-        Logs.d("chat Activity"," name : "+name);
-        Logs.d("chat Activity"," id : "+position);
-        Logs.d("chat Activity"," type : "+type);
-        Logs.d("chat Activity"," type : "+channel.getSid());
+            Logs.d("chat Activity"," name : "+name);
+            Logs.d("chat Activity"," id : "+position);
+            Logs.d("chat Activity"," type : "+type);
+            Logs.d("chat Activity"," name : "+channel.getSid());
 
-        chatFragment=new ChatFragment();
-        chatFragment.setArguments(bundle);
+            chatFragment=new ChatFragment();
+            chatFragment.setArguments(bundle);
 
-        try {
-            if(chatFragment != null){
-                getSupportFragmentManager().beginTransaction()
-                        .setReorderingAllowed(true)
-                        .add(R.id.container, ChatFragment.class, bundle).addToBackStack(null)
-                        .commit();
+            try {
+                if(chatFragment != null){
+                    getSupportFragmentManager().beginTransaction()
+                            .setReorderingAllowed(true)
+                            .add(R.id.container, ChatFragment.class, bundle).addToBackStack(null)
+                            .commit();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
 
     }
 

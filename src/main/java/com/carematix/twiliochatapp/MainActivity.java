@@ -29,6 +29,7 @@ import com.carematix.twiliochatapp.architecture.table.UserAllList;
 import com.carematix.twiliochatapp.architecture.table.UserChannelList;
 import com.carematix.twiliochatapp.architecture.viewModel.UserChannelListViewModel;
 import com.carematix.twiliochatapp.architecture.viewModel.UserChannelViewModel;
+import com.carematix.twiliochatapp.architecture.viewModel.UserChatViewModel;
 import com.carematix.twiliochatapp.architecture.viewModel.UserListViewModel;
 import com.carematix.twiliochatapp.bean.accesstoken.TokenResponse;
 import com.carematix.twiliochatapp.bean.fetchChannel.ChannelDetails;
@@ -55,6 +56,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
@@ -157,6 +159,13 @@ public class MainActivity extends AppCompatActivity implements ChatClientListene
         try {
             channelManager = ChannelManager.getInstance();
 
+            String roleId = prefManager.getStringValue(PrefConstants.TWILIO_ROLE_ID);
+            ActionBar actionBar =getSupportActionBar();
+            if(roleId.equals("1")){
+                actionBar.setTitle("Nurse");
+            }else{
+                actionBar.setTitle("Patient");
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -242,6 +251,7 @@ public class MainActivity extends AppCompatActivity implements ChatClientListene
     public UserListViewModel allViewModel;
     public UserChannelViewModel channelViewModel;
     public UserChannelListViewModel userChannelViewModel;
+    public UserChatViewModel userChatViewModel;
     @Nullable
     @Override
     public View onCreateView(@NonNull String name, @NonNull Context context, @NonNull AttributeSet attrs) {
@@ -249,6 +259,7 @@ public class MainActivity extends AppCompatActivity implements ChatClientListene
         allViewModel = new ViewModelProvider(MainActivity.this).get(UserListViewModel.class);
         channelViewModel = new ViewModelProvider(MainActivity.this).get(UserChannelViewModel.class);
         userChannelViewModel = new ViewModelProvider(MainActivity.this).get(UserChannelListViewModel.class);
+        userChatViewModel = new ViewModelProvider(MainActivity.this).get(UserChatViewModel.class);
 
         return super.onCreateView(name, context, attrs);
     }
@@ -361,10 +372,10 @@ public class MainActivity extends AppCompatActivity implements ChatClientListene
 
     public void setAllChannel(Response<ChannelDetails> response,int attendProgramUserId){
 
-       String programUserId = prefManager.getStringValue(PrefConstants.PROGRAM_USER_ID);
+
 
         try {
-
+            String programUserId = prefManager.getStringValue(PrefConstants.PROGRAM_USER_ID);
             com.carematix.twiliochatapp.bean.fetchChannel.Data data=  response.body().getData();
             String sid=data.getChannelSid();
 
@@ -374,6 +385,8 @@ public class MainActivity extends AppCompatActivity implements ChatClientListene
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        getChannels();
 
     }
 
@@ -440,28 +453,32 @@ public class MainActivity extends AppCompatActivity implements ChatClientListene
     public void getChannels(){
       //  stopActivityIndicator();
 
-        if (channels == null) return;
-        if (chatClientManager == null || chatClientManager.getChatClient() == null) return;
+        try {
+            if (channels == null) return;
+            if (chatClientManager == null || chatClientManager.getChatClient() == null) return;
 
-        channelsObject = chatClientManager.getChatClient().getChannels();
+            channelsObject = chatClientManager.getChatClient().getChannels();
 
-        channels.clear();
+            channels.clear();
 
-        channelsObject.getPublicChannelsList(new CallbackListener<Paginator<ChannelDescriptor>>() {
-            @Override
-            public void onSuccess(Paginator<ChannelDescriptor> channelDescriptorPaginator) {
-                getChannelsPage(channelDescriptorPaginator);
-            }
-        });
+            channelsObject.getPublicChannelsList(new CallbackListener<Paginator<ChannelDescriptor>>() {
+                @Override
+                public void onSuccess(Paginator<ChannelDescriptor> channelDescriptorPaginator) {
+                    getChannelsPage(channelDescriptorPaginator);
+                }
+            });
 
-        channelsObject.getUserChannelsList(new CallbackListener<Paginator<ChannelDescriptor>>() {
-            @Override
-            public void onSuccess(Paginator<ChannelDescriptor> channelDescriptorPaginator) {
-                getChannelsPage(channelDescriptorPaginator);
-            }
-        });
+            channelsObject.getUserChannelsList(new CallbackListener<Paginator<ChannelDescriptor>>() {
+                @Override
+                public void onSuccess(Paginator<ChannelDescriptor> channelDescriptorPaginator) {
+                    getChannelsPage(channelDescriptorPaginator);
+                }
+            });
 
-        channelManager.setChannelListener(this);
+            channelManager.setChannelListener(this);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
 
@@ -471,7 +488,7 @@ public class MainActivity extends AppCompatActivity implements ChatClientListene
                 Log.e("HASNEXTPAGE","Adding channel descriptor for sid|"+cd.getSid()+"| friendlyName "+cd.getFriendlyName());
                 channels.put(cd.getSid(), new ChannelModel(cd));
             }
-            refreshChannelList();
+            //refreshChannelList();
 
             Log.e("HASNEXTPAGE", String.valueOf(paginator.getItems().size()));
             Log.e("HASNEXTPAGE", paginator.hasNextPage() ? "YES" : "NO");
@@ -493,14 +510,15 @@ public class MainActivity extends AppCompatActivity implements ChatClientListene
                 List<Channel> ch = channelsObject.getSubscribedChannels();
                 for (Channel channel : ch) {
                     Log.e("HASNEXTPAGE","Adding descriptor for sid|"+channel.getSid()+"| friendlyName "+channel);
-
                     channels.put(channel.getSid(), new ChannelModel(channel));
                 }
-                refreshChannelList();
+
             }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
+        refreshChannelList();
         try {
             setFCMToken();
             stopActivityIndicator();
@@ -538,12 +556,14 @@ public class MainActivity extends AppCompatActivity implements ChatClientListene
             List list = new LinkedList(channels.values());
             Collections.sort(list, new CustomChannelComparator());
 
-           // userListAdapter=new UserListAdapter(this,arrayList,this,channels);
-           // mRecyclerView.setAdapter(userListAdapter);
-           // userListAdapter.notifyDataSetChanged();
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    userListAdapter.addItem(channels);
+                    userListAdapter.notifyDataSetChanged();
+                }
+            });
 
-            userListAdapter.addItem(channels);
-            userListAdapter.notifyDataSetChanged();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -710,6 +730,12 @@ public class MainActivity extends AppCompatActivity implements ChatClientListene
         }
         try {
             userChannelViewModel.delete();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            userChatViewModel.delete();
         } catch (Exception e) {
             e.printStackTrace();
         }

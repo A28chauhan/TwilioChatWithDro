@@ -21,6 +21,7 @@ class PrefConstants {
     // user details
     public static final String USER_ID ="user_id";
     public static final String PROGRAM_USER_ID ="program_user_id";
+    public static final String CHANNEL_ID ="channel_id";
 
     // user info
     public static final String IS_FIRST_TIME_LOGIN="first_time_login_user";

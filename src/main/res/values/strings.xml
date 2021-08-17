@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">TwilioChatApp</string>
+    <string name="app_name">TwilioChat</string>
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>
@@ -37,7 +37,7 @@
     <string name="join">Join</string>
     <string name="decline">Decline</string>
 
-    <string name="leave_msg">Leave Channel ?</string>
+    <string name="leave_msg">Leave</string>
     <string name="ok">Ok</string>
     <string name="cancel">Cancel</string>
 </resources>

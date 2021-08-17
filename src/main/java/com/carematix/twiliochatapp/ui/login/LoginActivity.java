@@ -36,6 +36,7 @@ import com.carematix.twiliochatapp.application.SessionManager;
 import com.carematix.twiliochatapp.application.TwilioApplication;
 import com.carematix.twiliochatapp.architecture.viewModel.UserChannelListViewModel;
 import com.carematix.twiliochatapp.architecture.viewModel.UserChannelViewModel;
+import com.carematix.twiliochatapp.architecture.viewModel.UserChatViewModel;
 import com.carematix.twiliochatapp.architecture.viewModel.UserListViewModel;
 import com.carematix.twiliochatapp.bean.FetchUser;
 import com.carematix.twiliochatapp.bean.User;
@@ -114,6 +115,11 @@ public class LoginActivity extends AppCompatActivity implements LoginListener {
 
         try {
             userChannelViewModel.delete();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+        userChatViewModel.delete();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -234,8 +240,15 @@ public class LoginActivity extends AppCompatActivity implements LoginListener {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    loginViewModel.login(usernameEditText.getText().toString(),
-                            passwordEditText.getText().toString());
+                   /* loginViewModel.login(usernameEditText.getText().toString(),
+                            passwordEditText.getText().toString());*/
+                    loadingProgressBar.setVisibility(View.VISIBLE);
+
+                    sharedPreferences.edit().putString("userName", binding.username.getText().toString())
+                            .putBoolean("pinCerts", true)
+                            .putString("realm", "us1")
+                            .putString("ttl", "3000").commit();
+                    attemptLogin();
                 }
                 return false;
             }
@@ -313,6 +326,7 @@ public class LoginActivity extends AppCompatActivity implements LoginListener {
     public UserListViewModel allViewModel;
     public UserChannelViewModel channelViewModel;
     public UserChannelListViewModel userChannelViewModel;
+    public UserChatViewModel userChatViewModel;
     @Nullable
     @Override
     public View onCreateView(@NonNull String name, @NonNull Context context, @NonNull AttributeSet attrs) {
@@ -320,6 +334,7 @@ public class LoginActivity extends AppCompatActivity implements LoginListener {
         allViewModel = new ViewModelProvider(LoginActivity.this).get(UserListViewModel.class);
         channelViewModel = new ViewModelProvider(LoginActivity.this).get(UserChannelViewModel.class);
         userChannelViewModel = new ViewModelProvider(LoginActivity.this).get(UserChannelListViewModel.class);
+        userChatViewModel = new ViewModelProvider(LoginActivity.this).get(UserChatViewModel.class);
         return super.onCreateView(name, context, attrs);
     }
 
